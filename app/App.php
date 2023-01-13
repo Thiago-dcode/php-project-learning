@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 // Your Code
 
-//get a number and concatenated it with a dollar sign and a comma.
 
+//All functionallity of the program happen inside of this function, it accept a string
+//which is the direccion of the file.
 
 function app(string $file)
 {
+
+    //get a number and concatenated it with a dollar sign and a comma.
     function formatNumber(float $num)
 {
     //variable to fill with comma and dollar sign.
@@ -38,7 +41,7 @@ function app(string $file)
         if ($i % 3 === 0) {
 
             $numFormated = $numFormated . ',';
-        }
+}
     }
 
     //cocatenating the float part, the dollar sign, and in case
@@ -59,6 +62,7 @@ function app(string $file)
     return  $numFormated;
 }
 
+    //function that accept a string as argument which extract from it the numbers concatenated with symbols: "$2,345.45" => 2345.45
     function parseToInt(string $str)
     {
 
@@ -73,11 +77,12 @@ function app(string $file)
         return (float) $number;
     }
 
+        
 
-
-    //Store each line of the file passed by argument into an array
-    function getFile(string $file)
+    //extract each line of the file passed by argument into an array
+    function fileToArray(string $file)
     {
+
         if (!is_file($file)) {
             echo 'this function only accept files';
 
@@ -85,21 +90,28 @@ function app(string $file)
         }
         $lines = array();
 
-        //open the with reading permission
+        //open the file with reading permission
 
         $file = fopen($file, 'r');
+        //iterator to avoid take the first line of the file, because is not
+        //that data is not important
         $i = 0;
+        //reading each line of the file, and pushing them to the empty array made previously
         while (($line = fgetcsv($file)) !== false) {
             $i++;
             if ($i === 1) continue;
+
+            //each line is an array with each index is the data separated by commas on the csv file
+            // data, 123, transacion =>  line= [data, 123, transaction]
             array_push($lines, $line);
         }
         fclose($file);
-
+       
         return  $lines;
     }
 
-
+    //accept as argument the previous array made by the csv file, and turn it into an array of associative arrays
+    // for working with the data more easily    
     function getData(array $data)
     {
 
@@ -121,14 +133,16 @@ function app(string $file)
         }, $data);
     };
 
+    //Function that accept the previous array to do arithmetics operations with the numbers inside of it.
     function getIncomeAndExpenseAndTotal(array $data)
     {
 
+        // using only one array reduce to sum all INCOMES, and substract all EXPENSES and last sum them to see the outcome.
         $calculation = array_reduce($data, function ($acc, $dt) {
 
             $sum = 0;
             $substract = 0;
-
+            //using the previous function to parse the data from the CSV into numbers.
             if (parseToInt($dt['amount']) > 0) {
                 $sum = parseToInt($dt['amount']);
             } else $substract = parseToInt($dt['amount']);
@@ -137,10 +151,12 @@ function app(string $file)
         }, [0, 0]);
 
 
-
+        //And return the data into an associative array to easily insert later on the html document
         return ['income' => formatNumber($calculation[0]), 'expense' => formatNumber($calculation[1]), 'total' => formatNumber($calculation[2])];
     };
 
+
+    //Turn the array returned from getData function, into an array where each index are html elements with the data incrusted
     function printData(array $data)
     {
 
@@ -151,6 +167,7 @@ function app(string $file)
             $check = $dt['check'];
             $description = $dt['description'];
             $amount = $dt['amount'];
+            //if the amount of the transaccion is positive style it with green color, otherwise with color red.
             $style = parseToInt($amount) > 0 ? "style ='color:green'" : "style ='color:red'";
             return "<tr>
               <td>$date</td>
@@ -160,7 +177,9 @@ function app(string $file)
           </tr>";
         }, $data);
     };
-    $dataFromFile = getFile($file);
+
+    //calling all the function.
+    $dataFromFile = fileToArray($file);
 
     $arrFromData = getData($dataFromFile);
     $dataToPrint = printData($arrFromData);

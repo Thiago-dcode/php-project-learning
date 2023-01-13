@@ -39,12 +39,14 @@
             <tbody>
 
             <?php 
-              
+              //including index.php document, to get the app data to insert on the HTML
               $index = dirname(__DIR__) . DIRECTORY_SEPARATOR.'public'.DIRECTORY_SEPARATOR.'index.php';
               require_once $index;
+              //elements to complete the body
                 $body = $appData[0];
+                //elements to complete the footer
                 $foot = $appData[1];
-                
+                //printing each element with the csv data on the html document
                 foreach ($body as  $value) {
                     echo $value;
                 }
